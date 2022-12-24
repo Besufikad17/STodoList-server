@@ -9,6 +9,7 @@ route.post("/login", userController.login);
 
 route.get("/todos/:id", userController.getTodosById);
 route.get("/export/:id", userController.exportTodo);
+route.get("/json/:jdata", userController.getExport);
 
 route.put("/update/:id", userController.updateTodo);
 

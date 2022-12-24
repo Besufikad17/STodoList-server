@@ -110,7 +110,7 @@ class UserController {
   };
 
   public getTodosById = async (req: Request<{ id: string }>, res: Response) => {
-    const id = req.params.id;
+    const id = parseInt(req.params.id);
 
     if (!id) {
       return res.json({
@@ -143,7 +143,7 @@ class UserController {
   };
 
   public updateTodo = async (req: Request<{ id: string }>, res: Response) => {
-    const id = req.params.id;
+    const id = parseInt(req.params.id);
 
     const { todos } = req.body;
 
@@ -181,8 +181,8 @@ class UserController {
     }
   };
 
-  public exportTodo = async (req: Request, res: Response) => {
-    const id = req.params.id;
+  public exportTodo = async (req: Request<{ id: string }>, res: Response) => {
+    const id = parseInt(req.params.id);
 
     if (!id) {
       return res.json({
@@ -193,32 +193,42 @@ class UserController {
     }
 
     try {
+      const user = await prisma.user.findMany({
+        where: {
+          id,
+        },
+      });
 
-        const user = await prisma.user.findMany({
-            where: {
-                id
-            }
-        })
+      fs.writeFile(
+        "dist/controllers/export.json",
+        JSON.stringify(user[0].todos),
+        "utf8",
+        function (err) {
+          if (err) {
+            console.log("An error occured while writing JSON Object to File.");
+            return console.log(err);
+          }
 
-        fs.writeFile("dist/controllers/export.json", JSON.stringify(user[0].todos) , 'utf8', function (err) {
-            if (err) {
-                console.log("An error occured while writing JSON Object to File.");
-                return console.log(err);
-            }
-        
-            console.log("JSON file has been saved.");
-        });
-        console.log(__dirname+ '/export.json');
-        // FIXME
-        res.sendFile(__dirname + '/export.json');
-    }catch (error) {
-        console.log(error);
-        return res.json({
-          success: false,
-          data: null,
-          error: error,
-        });
-      }
+          console.log("JSON file has been saved.");
+
+          const jdata = require("./export.json");
+          res.send(JSON.stringify(jdata));
+        }
+      );
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        data: null,
+        error: error,
+      });
+    }
+  };
+
+  public getExport = async (req: Request<{ jdata: string }>, res: Response) => {
+    const jdata = req.params.jdata;
+
+    res.sendFile(__dirname + `/${jdata}`);
   };
 }
 
