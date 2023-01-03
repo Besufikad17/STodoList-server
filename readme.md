@@ -1,4 +1,4 @@
-# Myskins-server
+# STodoList-server
 
 <p>Backend application for STodoList made by using nodejs, typescript, prisma and mongodb.</p>
 
